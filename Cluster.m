@@ -12,7 +12,7 @@ classdef Cluster
     end
     
     methods
-        function obj = DroneCluster(lat, lon, shipH, nDrones, xBound, yBound, hRange)
+        function obj = Cluster(lat, lon, shipH, nDrones, xBound, yBound, hRange)
             obj.CentralizedLat = lat;
             obj.CentralizedLon = lon;
             obj.CentralizedHeight = shipH;
