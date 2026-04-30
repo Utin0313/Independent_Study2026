@@ -48,19 +48,30 @@ classdef Cluster < handle
             constant = 111139;
             cx = obj.CentralizedLat * constant; 
             cy = obj.CentralizedLon * constant;
+            
             r = (obj.HeightRange(2) - obj.HeightRange(1));  % Convert to degree
             
-            x = cx + (rand(N, 1) - 0.5) * 2*r;
-            y = cy + (rand(N, 1) - 0.5) * 2*r;
-            z = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
-            
-            inside = (cx - x).^2 + (cy - y).^2 + (obj.HeightRange(1) - z).^2 <= r.^2;
+            baseZ = obj.HeightRange(1); 
 
-            lat = x(inside) ./ constant; 
-            lon = y(inside) ./ constant; 
-            height = z(inside);
-            obj.Locations = [lat, lon, height]; 
-            obj.ClusterSize = size(obj.Locations, 1);
+            points = zeros(N,3); 
+            count = 0;
+            while count < N
+                dx = (rand - 0.5) * 2*r;
+                dy = (rand - 0.5) * 2*r;
+                dz = abs((rand - 0.5) * 2*r);
+             
+                if dx*dx + dy*dy + dz*dz <= r*r
+
+                    x = cx + dx; 
+                    y = cy + dy;
+                    z = baseZ + dz; 
+
+                    count = count + 1; 
+                    points(count, :) = [x, y, z]; 
+    
+                end
+            end   
+            obj.Locations = [points(:,1) ./ constant, points(:,2) ./ constant, points(:,3)];
         end
             
         function generateDomeSliceLocations(obj)
@@ -69,23 +80,32 @@ classdef Cluster < handle
             constant = 111139; 
             cx = obj.CentralizedLat * constant; 
             cy = obj.CentralizedLon * constant;
+
             r = obj.HeightRange(2) - obj.HeightRange(1);
-            epilson = (obj.HeightRange(2) - obj.HeightRange(1)) * 0.05; 
-
-            x = cx + (rand(N, 1) - 0.5) * 2 * r;
-            y = ones(N, 1) .* cy;
-            z = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
+            epilson = r * 0.05; 
             
-            mask = abs(y - cy) < epilson;  
-            inside = (cx - x).^2 + (cy - y).^2 + (obj.HeightRange(1) - z).^2 <= r.^2; 
-            isInside = inside & mask; 
-            
-            lat = x(isInside) ./ constant; 
-            lon = y(isInside) ./ constant; 
-            height = z(isInside);
+            zmin = obj.HeightRange(1); 
+            zmax = obj.HeightRange(2); 
 
-            obj.Locations = [lat, lon, height]; 
-            obj.ClusterSize = size(obj.Locations, 1);
+            points = zeros(N,3); 
+            count = 0;
+            while count < N
+                x = cx + (rand - 0.5) * 2*r;
+                y = cy + (rand - 0.5) * 2*r;
+                z = zmin + rand*(zmax - zmin);
+                
+                dx = cx -x; 
+                dy = cy - y; 
+                dz = 0; 
+
+                inside = dx*dx + dy*dy + dz*dz <= r*r;
+                mask = abs(y - cy) < epilson;  
+                if inside && mask 
+                   count = count + 1; 
+                   points(count, :) = [x, y, z]; 
+                end
+            end 
+            obj.Locations = [points(:,1) ./ constant, points(:,2) ./ constant, points(:,3)];
         end 
     end 
 end
