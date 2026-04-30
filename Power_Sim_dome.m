@@ -28,7 +28,7 @@ bound_x_deg_c2 = C2_x * deg_per_m; bound_y_deg_c2 = C2_y * deg_per_m;
 C1 = Cluster(lat_c1, lon_c1, 10, bound_x_deg_c1, bound_y_deg_c1, low_altitude_bounds);
 C2 = Cluster(lat_c2, lon_c2, 10, bound_x_deg_c2, bound_y_deg_c2, low_altitude_bounds);
 C3 = Cluster(lat_c1, lon_c1, 200, 0, 0, high_altitude_bounds, "dome");
-C4 = Cluster(lat_c2, lon_c2, 200, 0, 0, high_altitude_bounds, "dome");
+C4 = Cluster(lat_c2, lon_c2, 200, 0, 0, high_altitude_bounds, "slice");
 
 % SIMULATE SIGNAL STRENGTH 
 clusters = {C1, C2, C3, C4};

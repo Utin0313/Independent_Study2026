@@ -32,48 +32,59 @@ classdef Cluster < handle
         end
         
         function generateLocations(obj)
-            latOffset = (rand(obj.ClusterSize, 1) - 0.5) * obj.YBoundary;   % YBoudary, XBoundary (e.g.,0.001,0.002,etc.) = 0.001degree * 111139degree/m = 111.139m  
-            lonOffset = (rand(obj.ClusterSize, 1) - 0.5) * obj.XBoundary;
-            RandomHeights = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)) * rand(obj.ClusterSize, 1);
+            x = (rand(obj.ClusterSize, 1) - 0.5) * obj.YBoundary;   % YBoudary, XBoundary (e.g.,0.001,0.002,etc.) = 0.001degree * 111139degree/m = 111.139m  
+            y = (rand(obj.ClusterSize, 1) - 0.5) * obj.XBoundary;
+            z = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)) * rand(obj.ClusterSize, 1);
 
-            ClusterLocation = [obj.CentralizedLat + latOffset, obj.CentralizedLon + lonOffset, RandomHeights]; 
+            ClusterLocation = [obj.CentralizedLat + x, obj.CentralizedLon + y, z]; 
             obj.Locations = ClusterLocation;
         end 
     end
 
     methods (Access = private)
         function generateDomeLocations(obj)
-            constant = 111139; 
-            N = obj.ClusterSize; 
-            radius = (obj.HeightRange(2) - obj.HeightRange(1)) / constant; % Convert to degree
-            centralizedLat = obj.CentralizedLat; 
-            centralizedLon = obj.CentralizedLon;
+            N = obj.ClusterSize;
+
+            constant = 111139;
+            cx = obj.CentralizedLat * constant; 
+            cy = obj.CentralizedLon * constant;
+            r = (obj.HeightRange(2) - obj.HeightRange(1));  % Convert to degree
             
-            latOffset = centralizedLat + (rand(N, 1) - 0.5) * 2 * radius;
-            lonOffset = centralizedLon + (rand(N, 1) - 0.5) * 2 * radius;
-            HeightOffSet = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
+            x = cx + (rand(N, 1) - 0.5) * 2*r;
+            y = cy + (rand(N, 1) - 0.5) * 2*r;
+            z = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
             
-            inside = (centralizedLat - latOffset).^2 + (centralizedLon - lonOffset).^2 + (obj.HeightRange(1) - HeightOffSet).^2 <= radius.^2;
-            obj.Locations = [latOffset(inside), lonOffset(inside), HeightOffSet(inside)]; % Convert back to lat and lon (unit:degree) by ./111139
+            inside = (cx - x).^2 + (cy - y).^2 + (obj.HeightRange(1) - z).^2 <= r.^2;
+
+            lat = x(inside) ./ constant; 
+            lon = y(inside) ./ constant; 
+            height = z(inside);
+            obj.Locations = [lat, lon, height]; 
             obj.ClusterSize = size(obj.Locations, 1);
         end
             
         function generateDomeSliceLocations(obj)
-            constant = 111139; 
-            N  = obj.ClusterSize; 
-            radius = obj.HeightRange(2) - obj.HeightRange(1); 
-            epilson = (obj.HeightRange(2) - obj.HeightRange(1)) * 0.05; 
-            centralizedLat = obj.CentralizedLat * constant; 
-            centralizedLon = obj.CentralizedLon * constant;
-
-            latOffset = centralizedLat + (rand(N, 1) - 0.5) * 2 * radius;
-            lonOffset = ones(N, 1) .* centralizedLon;
-            HeightOffSet = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
+            N  = obj.ClusterSize;
             
-            sliceMask = abs(lonOffset - centralizedLon) < epilson;  
-            inside = (centralizedLat - latOffset).^2 + (centralizedLon - lonOffset).^2 + (obj.HeightRange(1) - HeightOffSet).^2 <= radius.^2; 
-            isInside = inside & sliceMask; 
-            obj.Locations = [latOffset(isInside) ./ constant, lonOffset(isInside) ./ constant, HeightOffSet(isInside)];
+            constant = 111139; 
+            cx = obj.CentralizedLat * constant; 
+            cy = obj.CentralizedLon * constant;
+            r = obj.HeightRange(2) - obj.HeightRange(1);
+            epilson = (obj.HeightRange(2) - obj.HeightRange(1)) * 0.05; 
+
+            x = cx + (rand(N, 1) - 0.5) * 2 * r;
+            y = ones(N, 1) .* cy;
+            z = obj.HeightRange(1) + (obj.HeightRange(2) - obj.HeightRange(1)).*rand(N,1); 
+            
+            mask = abs(y - cy) < epilson;  
+            inside = (cx - x).^2 + (cy - y).^2 + (obj.HeightRange(1) - z).^2 <= r.^2; 
+            isInside = inside & mask; 
+            
+            lat = x(isInside) ./ constant; 
+            lon = y(isInside) ./ constant; 
+            height = z(isInside);
+
+            obj.Locations = [lat, lon, height]; 
             obj.ClusterSize = size(obj.Locations, 1);
         end 
     end 

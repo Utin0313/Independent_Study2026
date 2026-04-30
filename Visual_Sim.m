@@ -1,7 +1,7 @@
 clc; clear; close all;
 
 % Automatically find the most recent simulation file
-fileInfo = dir('PowerSimResults_20260428_014249.mat');
+fileInfo = dir('PowerSimResults_20260430_001736.mat');
 if isempty(fileInfo)
     error('No saved data file found. Please run the simulation (TEST10) first.');
 end

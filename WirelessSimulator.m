@@ -49,6 +49,17 @@ classdef WirelessSimulator < handle
                 return;
             end
             
+            % -- Debug -- 
+            lat = obj.AllLocations(:,1); 
+            lon = obj.AllLocations(:,2); 
+
+            disp(['Lat size: ', num2str(length(lat))])
+            disp(['Lon size: ', num2str(length(lon))])
+            
+            if size(obj.AllLocations,1) < 1
+                error("AllLocations is empty. Cluster generation failed.")
+            end
+            
             txs = txsite("Latitude", obj.AllLocations(:,1).', ...
                          "Longitude", obj.AllLocations(:,2).', ...
                          "AntennaHeight", obj.AllLocations(:,3).', ...
