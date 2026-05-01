@@ -21,7 +21,6 @@ classdef Cluster < handle
             if nargin <7
                 mode = "box"; 
             end
-
             if mode == "box"
                 obj.generateLocations();
             elseif mode == "dome"
@@ -45,25 +44,30 @@ classdef Cluster < handle
         function generateDomeLocations(obj)
             N = obj.ClusterSize;
 
-            constant = 111139;
-            cx = obj.CentralizedLat * constant; 
-            cy = obj.CentralizedLon * constant;
+            % -- Reference point --
+            lat0 = obj.CentralizedLat; 
+            lon0 = obj.CentralizedLon;
             
-            r = (obj.HeightRange(2) - obj.HeightRange(1));  % Convert to degree
-            
+            % -- Proper scaling -- 
+            meters_per_deg_lat = 111139; 
+            meters_per_deg_lon = 111139 * cosd(lat0); 
+
+            % -- Sphere radius --
+            r = (obj.HeightRange(2) - obj.HeightRange(1));  
             baseZ = obj.HeightRange(1); 
 
             points = zeros(N,3); 
             count = 0;
             while count < N
+                % -- Spherical sample in meters -- 
                 dx = (rand - 0.5) * 2*r;
                 dy = (rand - 0.5) * 2*r;
                 dz = abs((rand - 0.5) * 2*r);
              
                 if dx*dx + dy*dy + dz*dz <= r*r
-
-                    x = cx + dx; 
-                    y = cy + dy;
+                    % -- Convert back to x,y --     
+                    x = lat0 + dx / meters_per_deg_lat; 
+                    y = lon0 + dy / meters_per_deg_lon;
                     z = baseZ + dz; 
 
                     count = count + 1; 
@@ -71,41 +75,46 @@ classdef Cluster < handle
     
                 end
             end   
-            obj.Locations = [points(:,1) ./ constant, points(:,2) ./ constant, points(:,3)];
+            obj.Locations = [points(:,1), points(:,2), points(:,3)];
         end
             
         function generateDomeSliceLocations(obj)
             N  = obj.ClusterSize;
             
-            constant = 111139; 
-            cx = obj.CentralizedLat * constant; 
-            cy = obj.CentralizedLon * constant;
+            % -- Reference point -- 
+            lat0 = obj.CentralizedLat; 
+            lon0 = obj.CentralizedLon;
 
+            % -- Proper scaling -- 
+            meters_per_deg_lat = 111139; 
+            meters_per_deg_lon = 111139 * cosd(lat0);
+
+            % -- Sphere radius --
             r = obj.HeightRange(2) - obj.HeightRange(1);
             epilson = r * 0.05; 
-            
             zmin = obj.HeightRange(1); 
             zmax = obj.HeightRange(2); 
 
             points = zeros(N,3); 
             count = 0;
             while count < N
-                x = cx + (rand - 0.5) * 2*r;
-                y = cy + (rand - 0.5) * 2*r;
+                % -- Spherical sample in meters -- 
+                dx = (rand - 0.5) * 2*r;
+                dy = (rand - 0.5) * 2*r;
                 z = zmin + rand*(zmax - zmin);
-                
-                dx = cx -x; 
-                dy = cy - y; 
-                dz = 0; 
 
-                inside = dx*dx + dy*dy + dz*dz <= r*r;
-                mask = abs(y - cy) < epilson;  
-                if inside && mask 
+                inside = dx*dx + dy*dy <= r*r;
+                mask = abs(dy) < epilson;  
+                if inside && mask
+                    % -- Convert back to x,y -- 
+                    x = lat0 + dx / meters_per_deg_lat; 
+                    y = lon0 + dy / meters_per_deg_lon; 
+
                    count = count + 1; 
                    points(count, :) = [x, y, z]; 
                 end
             end 
-            obj.Locations = [points(:,1) ./ constant, points(:,2) ./ constant, points(:,3)];
+            obj.Locations = [points(:,1), points(:,2), points(:,3)];
         end 
     end 
 end

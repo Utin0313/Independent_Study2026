@@ -15,7 +15,7 @@ classdef WirelessSimulator < handle
         AllLocations        
     end
     
-    methods
+    methods (Access = public)
         function obj = WirelessSimulator(clusters)
             obj.Clusters = clusters;
             obj.updateLocations();
@@ -85,6 +85,26 @@ classdef WirelessSimulator < handle
 
         end
        
+        
+        function showSiteViewerNodes(obj)
+            sv = siteviewer("Basemap","openstreetmap");
+            
+            for i = 1:length(obj.Clusters)
+                locs = obj.Clusters(i).Locations;
+
+                for j = 1:size(locs,1)
+    
+                    tx = txsite( ...
+                        "Name", sprintf("C%d-N%d", i, j), ...
+                        "Latitude", locs(j,1), ...
+                        "Longitude", locs(j,2), ...
+                        "AntennaHeight", locs(j,3), ...
+                        "TransmitterFrequency", obj.Frequency); 
+                    
+                    show(tx);
+                end 
+            end 
+        end 
 
         function [conn, P_link] = computeConnectivity(obj, modelType, threshold)
             if isempty(obj.StoredSS)

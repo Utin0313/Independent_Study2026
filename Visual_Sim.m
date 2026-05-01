@@ -1,7 +1,7 @@
 clc; clear; close all;
 
 % Automatically find the most recent simulation file
-fileInfo = dir('PowerSimResults_20260430_163224.mat');
+fileInfo = dir('PowerSimResults_*.mat');
 if isempty(fileInfo)
     error('No saved data file found. Please run the simulation (TEST10) first.');
 end
@@ -10,16 +10,20 @@ latestFile = fileInfo(idx).name;
 fprintf('Loading data from: %s\n', latestFile);
 load(latestFile); 
 
+if iscell(clusters)
+    clusters = [clusters{:}];
+end
+
 % --- Setup Shared Plotting Variables ---
 colors = ['r'; 'b' ; 'g'; 'y']; % Red, Blue, Green, Yellow
-labels = {'Ship 1 + Drones (C1)', 'Ship 2 + Drones (C2)', 'Overhead 1 (C3)', 'Overhead 2 (C4)'};
+labels = {'Ship 1 (C1)', 'Ship 2 (C2)', 'Overhead 1 (C3)', 'Overhead 2 (C4)'};
 
 %% 2. FIGURE 1: 3D NODE LOCATIONS (NO LINKS)
 figure('Color', 'w', 'Name', 'Node Locations');
 hold on; grid on;
 
 for i = 1:length(clusters)
-    locs = clusters{i}.Locations;
+    locs = clusters(i).Locations;
     scatter3(locs(:,2), locs(:,1), locs(:,3), 60, colors(i,:), 'filled', ...
              'MarkerEdgeColor', 'k', 'DisplayName', labels{i});
 end
@@ -27,7 +31,7 @@ end
 xlabel('Longitude (deg)'); ylabel('Latitude (deg)'); zlabel('Altitude (m)');
 title('3D Node Locations (Cluster Visualization)');
 legend('Location', 'northeastoutside');
-view(3); axis tight;
+%view(3); axis tight;
 
 %% 3. FIGURE 2: 3D NETWORK TOPOLOGY (WITH LINKS)
 figure('Color', 'w', 'Name', 'Network Connectivity');
@@ -36,7 +40,7 @@ hold on; grid on;
 % 1. Reconstruct the global coordinate list
 allLocs = [];
 for i = 1:length(clusters)
-    locs = clusters{i}.Locations;
+    locs = clusters(i).Locations;
     allLocs = [allLocs; locs]; 
     
     % Plot the nodes again in this second figure
@@ -91,3 +95,8 @@ hold off
 title("CDF of individual Site")
 xlabel("dBm")
 legend(labels)
+
+%% Siteviewer
+sim = WirelessSimulator(clusters);
+sim.PropModel = "Longley-rice";
+sim.showSiteViewerNodes(); 
