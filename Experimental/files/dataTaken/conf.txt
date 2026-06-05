@@ -1,0 +1,15 @@
+Channel Amp = [34.25720458428933, 75.97487395554238, 97.92574272196049, 0, 0, 0]
+3 Iteration | 1s pause between iterations | 0.2s pause between addresses
+10dB Attenuation on Pluto | 10 RF Gain, 20 IF Gain, 20 BB Gain on RTL-SDR
+
+List Here How You Took Data (each set is a different cluster):
+
+1: Tx Off ~  6.5ft distance ~  3ft radius | N Obstruction
+2: Tx  On ~  6.5ft distance ~  3ft radius | N Obstruction
+3: Tx  On ~ 14.2ft distance ~  4ft radius | Y Obstruction (wall)
+4: Tx  On ~   19ft distance ~  8ft radius | Y Obstruction (wall + floor)
+5: Tx  On ~    4ft distance ~  1ft radius | N Obstruction
+6: Tx  On ~    4ft distance ~  1ft radius | Y Obstruction (Heavy Pi.3 aka 118) (Medium Pi.2 aka 117) (None Pi.1 aka 118)
+7: Tx  On ~    3ft distance ~  6ft radius | N Obstruction
+8: Tx  On ~  0.5ft distance ~  1ft radius | N Obstruction
+9: Tx Off ~  0.5ft distance ~  1ft radius | N Obstruction
